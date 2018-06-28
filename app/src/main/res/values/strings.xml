@@ -2,7 +2,6 @@
     <string name="app_name">MovieDB</string>
     <string name="action_settings">Settings</string>
 
-    <string name="api_key" translatable="false">43a7ea280d085bd0376e108680615c7f</string>
     <string name="title_activity_scrolling">ScrollingActivity</string>
     <string name="large_text">
         "Material is the metaphor.\n\n"

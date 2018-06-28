@@ -1,9 +1,7 @@
-package app.aymanissa.com.moviedb;
+package app.aymanissa.com.moviedb.Activities;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
 import android.support.v4.view.MenuItemCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.GridLayoutManager;
@@ -11,12 +9,10 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.SearchView;
 import android.support.v7.widget.Toolbar;
-import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.ViewManager;
+import android.view.View;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.zplesac.connectionbuddy.ConnectionBuddy;
 import com.zplesac.connectionbuddy.interfaces.ConnectivityChangeListener;
@@ -24,29 +20,36 @@ import com.zplesac.connectionbuddy.models.ConnectivityEvent;
 import com.zplesac.connectionbuddy.models.ConnectivityState;
 
 import java.util.ArrayList;
+import java.util.List;
 
-import app.aymanissa.com.moviedb.models.Movie;
-import app.aymanissa.com.moviedb.models.Result;
+import app.aymanissa.com.moviedb.Adapters.MoviesAdapter;
+import app.aymanissa.com.moviedb.Constants;
+import app.aymanissa.com.moviedb.Interfaces.MoviesAdapterListener;
+import app.aymanissa.com.moviedb.Interfaces.MoviesInterface;
+import app.aymanissa.com.moviedb.Models.Movie;
+import app.aymanissa.com.moviedb.Models.Result;
+import app.aymanissa.com.moviedb.MoviesController;
+import app.aymanissa.com.moviedb.R;
+import app.aymanissa.com.moviedb.SortType;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import iammert.com.library.Status;
 import iammert.com.library.StatusView;
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
 
 public class MainActivity extends AppCompatActivity implements MoviesAdapterListener, SearchView.OnQueryTextListener, ConnectivityChangeListener {
 
     MoviesAdapter moviesAdapter;
 
-    ArrayList<Movie> mainMoviesArrayList;
+    List<Movie> mainMoviesArrayList;
 
     @BindView(R.id.recyclerView) RecyclerView recyclerView;
-    SearchView searchView;
     @BindView(R.id.noMoviesFoundTextView) TextView noMoviesFoundTextView;
 
     @BindView(R.id.status) StatusView statusView;
 
+    SearchView searchView;
+    MenuItem popularMenuItem;
+    MenuItem topRatedMenuItem;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -68,6 +71,8 @@ public class MainActivity extends AppCompatActivity implements MoviesAdapterList
         getMenuInflater().inflate(R.menu.menu_main, menu);
 
         final MenuItem item = menu.findItem(R.id.action_search);
+        popularMenuItem = menu.findItem(R.id.action_popular);
+        topRatedMenuItem = menu.findItem(R.id.action_top_rated);
         searchView = (SearchView) MenuItemCompat.getActionView(item);
         searchView.setOnQueryTextListener(this);
 
@@ -89,71 +94,77 @@ public class MainActivity extends AppCompatActivity implements MoviesAdapterList
         // automatically handle clicks on the Home/Up button, so long
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
-
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            return true;
+        switch (id){
+            case R.id.action_settings:
+                return true;
+            case R.id.action_popular:
+                getMovies(SortType.POPULAR);
+                popularMenuItem.setVisible(false);
+                topRatedMenuItem.setVisible(true);
+                return true;
+            case R.id.action_top_rated:
+                getMovies(SortType.TOP_RATED);
+                popularMenuItem.setVisible(true);
+                topRatedMenuItem.setVisible(false);
+                return true;
         }
+
 
         return super.onOptionsItemSelected(item);
     }
 
-    void initRecyclerView(){
+    void initRecyclerView() {
         recyclerView.setHasFixedSize(true);
 
-        GridLayoutManager gridLayoutManager = new GridLayoutManager(this,2);
+        GridLayoutManager gridLayoutManager = new GridLayoutManager(this, 2);
         gridLayoutManager.setOrientation(LinearLayoutManager.VERTICAL);
         recyclerView.setLayoutManager(gridLayoutManager);
     }
 
-    void getMovies(){
-        Endpoint endpoint = ServiceGenerator.createService(Endpoint.class);
-        Call<Result> resultCall = endpoint.getMovives(getResources().getString(R.string.api_key));
-        resultCall.enqueue(new Callback<Result>() {
+    void getMovies(SortType sortType) {
+        MoviesController.getMovies(this, sortType, new MoviesInterface() {
             @Override
-            public void onResponse(Call<Result> call, Response<Result> response) {
-                mainMoviesArrayList = response.body().results;
+            public void onReceivedMovies(Result result) {
+                mainMoviesArrayList = result.movieList;
                 setMoviesAdapter(mainMoviesArrayList);
             }
 
             @Override
-            public void onFailure(Call<Result> call, Throwable t) {
+            public void onError(String errorMessage) {
 
             }
         });
     }
 
-    void searchMovies(String query){
-        Endpoint endpoint = ServiceGenerator.createService(Endpoint.class);
-        Call<Result> resultCall = endpoint.getSearchedMovives(getResources().getString(R.string.api_key),query);
-        resultCall.enqueue(new Callback<Result>() {
+    void searchMovies(String query) {
+        MoviesController.getSearchedMovies(this, query, new MoviesInterface() {
             @Override
-            public void onResponse(Call<Result> call, Response<Result> response) {
-                ArrayList<Movie> movieArrayList = response.body().results;
+            public void onReceivedMovies(Result result) {
+                List<Movie> movieArrayList = result.movieList;
                 setMoviesAdapter(movieArrayList);
 
-                if(movieArrayList.size()==0)
+                if (movieArrayList.size() == 0)
                     noMoviesFoundTextView.setVisibility(View.VISIBLE);
             }
 
             @Override
-            public void onFailure(Call<Result> call, Throwable t) {
+            public void onError(String errorMessage) {
 
             }
         });
     }
 
-    void setMoviesAdapter(ArrayList<Movie> moviesArrayList){
-        moviesAdapter = new MoviesAdapter(moviesArrayList,getApplicationContext(),this);
-        if(moviesArrayList != null)
+    void setMoviesAdapter(List<Movie> moviesArrayList) {
+        moviesAdapter = new MoviesAdapter(moviesArrayList, getApplicationContext(), this);
+        if (moviesArrayList != null)
             recyclerView.setAdapter(moviesAdapter);
 
     }
 
     @Override
     public void onMovieClickListener(Movie movie) {
-        Intent intent = new Intent(this,DetailsActivity.class);
-        intent.putExtra(Constants.MOVIE_PARCLE_EXTRA,movie);
+        Intent intent = new Intent(this, DetailsActivity.class);
+        intent.putExtra(Constants.MOVIE_PARCLE_EXTRA, movie);
         startActivity(intent);
     }
 
@@ -184,11 +195,11 @@ public class MainActivity extends AppCompatActivity implements MoviesAdapterList
 
     @Override
     public void onConnectionChange(ConnectivityEvent event) {
-        if(event.getState().getValue() == ConnectivityState.CONNECTED){
+        if (event.getState().getValue() == ConnectivityState.CONNECTED) {
             // device has active internet connection
 
-            if(mainMoviesArrayList.isEmpty())
-                getMovies();
+            if (mainMoviesArrayList.isEmpty())
+                getMovies(SortType.POPULAR);
 
             statusView.setStatus(Status.COMPLETE);
             Constants.INTERNET_CONNECTION_FLAG = true;

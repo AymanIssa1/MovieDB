@@ -1,10 +1,11 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    tools:context="app.aymanissa.com.moviedb.MainActivity">
+    tools:context="app.aymanissa.com.moviedb.Activities.MainActivity">
     <item
         android:id="@+id/action_settings"
         android:orderInCategory="100"
+        android:visible="false"
         android:title="@string/action_settings"
         app:showAsAction="never" />
 
@@ -14,4 +15,19 @@
         app:showAsAction="always"
         app:actionViewClass="android.support.v7.widget.SearchView"
         android:title="Search"/>
+
+    <item
+        android:id="@+id/action_top_rated"
+        android:orderInCategory="100"
+        android:title="Top Rated"
+        app:showAsAction="never" />
+
+    <item
+        android:id="@+id/action_popular"
+        android:orderInCategory="100"
+        android:title="Popular"
+        android:visible="false"
+        app:showAsAction="never" />
+
+
 </menu>
