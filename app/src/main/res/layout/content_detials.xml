@@ -56,7 +56,19 @@
                 android:text="Description"
                 android:textStyle="bold"
                 android:textSize="24sp"
+                android:layout_weight="1"
                 android:textColor="@android:color/white"/>
+
+            <com.like.LikeButton
+                android:id="@+id/likeButton"
+                app:icon_type="heart"
+                app:icon_size="25dp"
+                android:layout_gravity="center"
+                android:padding="8dp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"/>
+
+
 
         </LinearLayout>
 
@@ -67,6 +79,36 @@
             android:layout_margin="@dimen/text_margin"
             android:textStyle="bold"
             android:textColor="@android:color/white"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="@dimen/text_margin"
+            android:text=" - Trailers"
+            android:textStyle="bold"
+            android:textSize="24sp"
+            android:textColor="@android:color/white"/>
+
+        <android.support.v7.widget.RecyclerView
+            android:id="@+id/videosRecyclerView"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@android:color/transparent"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="@dimen/text_margin"
+            android:text=" - Reviews"
+            android:textStyle="bold"
+            android:textSize="24sp"
+            android:textColor="@android:color/white"/>
+
+        <android.support.v7.widget.RecyclerView
+            android:id="@+id/reviewsRecyclerView"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@android:color/transparent"/>
 
     </LinearLayout>
 

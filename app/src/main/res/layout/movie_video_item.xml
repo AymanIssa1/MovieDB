@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="wrap_content"
+    android:background="@android:color/transparent"
+    android:padding="8dp"
+    android:layout_height="wrap_content">
+
+    <android.support.v7.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+        android:layout_width="180dp"
+        android:layout_height="wrap_content"
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+        android:id="@+id/videoCardView"
+        app:cardCornerRadius="4dp"
+        app:contentPadding="8dp"
+        app:cardElevation="16dp">
+
+        <LinearLayout
+            xmlns:android="http://schemas.android.com/apk/res/android"
+            android:layout_width="180dp"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:orientation="vertical">
+
+            <ImageView
+                android:src="@drawable/youtube_icon"
+                android:layout_width="match_parent"
+                android:layout_height="100dp"
+                android:layout_gravity="center_horizontal"/>
+
+            <TextView
+                android:id="@+id/videoTitleTextView"
+                android:text="Movie VideoMovie VideoMovie VideoMovie VideoMovie VideoMovie Video"
+                android:layout_width="match_parent"
+                android:minLines="2"
+                android:maxLines="2"
+                android:ellipsize="end"
+                android:textSize="16dp"
+                android:textStyle="bold"
+                android:layout_margin="4dp"
+                android:gravity="center_horizontal"
+                android:layout_height="wrap_content" />
+
+        </LinearLayout>
+
+    </android.support.v7.widget.CardView>
+
+</RelativeLayout>
+
+
+
+

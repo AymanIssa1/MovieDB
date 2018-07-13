@@ -6,6 +6,10 @@ import android.util.Log;
 import com.google.gson.Gson;
 
 import app.aymanissa.com.moviedb.Interfaces.MoviesInterface;
+import app.aymanissa.com.moviedb.Interfaces.MoviesReviewsListener;
+import app.aymanissa.com.moviedb.Interfaces.MoviesTrailersListener;
+import app.aymanissa.com.moviedb.Models.MovieReviewsResult;
+import app.aymanissa.com.moviedb.Models.MovieTrailerResult;
 import app.aymanissa.com.moviedb.Models.Result;
 import io.reactivex.Observer;
 import io.reactivex.android.schedulers.AndroidSchedulers;
@@ -82,5 +86,67 @@ public class MoviesController {
                     }
                 });
     }
+
+
+    public static void getMovieTrailers(Activity activity, int movieId, final MoviesTrailersListener moviesTrailersListener) {
+        ApiClient.getInstance()
+                .getMovieTrailers(movieId, activity.getResources().getString(R.string.api_key))
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Observer<MovieTrailerResult>() {
+                    Disposable disposable;
+
+                    @Override
+                    public void onSubscribe(Disposable d) {
+                        disposable = d;
+                    }
+
+                    @Override
+                    public void onNext(MovieTrailerResult movieTrailerResult) {
+                        moviesTrailersListener.onReceivedMovieTrailers(movieTrailerResult);
+                    }
+
+                    @Override
+                    public void onError(Throwable e) {
+                        moviesTrailersListener.onError(e.getMessage());
+                    }
+
+                    @Override
+                    public void onComplete() {
+                        disposable.dispose();
+                    }
+                });
+    }
+
+    public static void getMovieReviews(Activity activity, int movieId, final MoviesReviewsListener moviesReviewsListener) {
+        ApiClient.getInstance()
+                .getMovieReviews(movieId, activity.getResources().getString(R.string.api_key))
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Observer<MovieReviewsResult>() {
+                    Disposable disposable;
+
+                    @Override
+                    public void onSubscribe(Disposable d) {
+                        disposable = d;
+                    }
+
+                    @Override
+                    public void onNext(MovieReviewsResult movieReviewsResult) {
+                        moviesReviewsListener.onReceivedMovieReviews(movieReviewsResult);
+                    }
+
+                    @Override
+                    public void onError(Throwable e) {
+                        moviesReviewsListener.onError(e.getMessage());
+                    }
+
+                    @Override
+                    public void onComplete() {
+                        disposable.dispose();
+                    }
+                });
+    }
+
 
 }

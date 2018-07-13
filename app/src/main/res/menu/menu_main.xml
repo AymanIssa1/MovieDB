@@ -29,5 +29,12 @@
         android:visible="false"
         app:showAsAction="never" />
 
+    <item
+        android:id="@+id/action_favorite"
+        android:orderInCategory="100"
+        android:title="Favorite Movies"
+        android:visible="true"
+        app:showAsAction="never" />
+
 
 </menu>

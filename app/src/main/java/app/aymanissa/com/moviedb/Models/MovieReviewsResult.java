@@ -3,41 +3,43 @@ package app.aymanissa.com.moviedb.Models;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
-import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Created by Ayman on 3/2/2018.
- */
+public class MovieReviewsResult {
 
-public class Result {
-
+    @SerializedName("id")
+    @Expose
+    private Integer id;
     @SerializedName("page")
     @Expose
     private Integer page;
-    @SerializedName("total_results")
+    @SerializedName("results")
     @Expose
-    private Integer totalResults;
+    private List<MovieReview> results = null;
     @SerializedName("total_pages")
     @Expose
     private Integer totalPages;
-    @SerializedName("results")
+    @SerializedName("total_results")
     @Expose
-    private List<Movie> movieList = new ArrayList<>();
+    private Integer totalResults;
+
+    public Integer getId() {
+        return id;
+    }
 
     public Integer getPage() {
         return page;
     }
 
-    public Integer getTotalResults() {
-        return totalResults;
+    public List<MovieReview> getResults() {
+        return results;
     }
 
     public Integer getTotalPages() {
         return totalPages;
     }
 
-    public List<Movie> getMovieList() {
-        return movieList;
+    public Integer getTotalResults() {
+        return totalResults;
     }
 }

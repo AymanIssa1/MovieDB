@@ -1,5 +1,8 @@
 package app.aymanissa.com.moviedb.Models;
 
+import android.arch.persistence.room.Entity;
+import android.arch.persistence.room.Ignore;
+import android.arch.persistence.room.PrimaryKey;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -13,14 +16,17 @@ import java.util.List;
  * Created by Ayman on 3/2/2018.
  */
 
+@Entity(tableName = "movie")
 public class Movie implements Parcelable {
 
-    @SerializedName("vote_count")
-    @Expose
-    private Integer voteCount;
+    @PrimaryKey(autoGenerate = true)
+    public int movieId;
     @SerializedName("id")
     @Expose
     private Integer id;
+    @SerializedName("vote_count")
+    @Expose
+    private Integer voteCount;
     @SerializedName("video")
     @Expose
     private Boolean video;
@@ -42,9 +48,6 @@ public class Movie implements Parcelable {
     @SerializedName("original_title")
     @Expose
     private String originalTitle;
-    @SerializedName("genre_ids")
-    @Expose
-    private List<Integer> genreIds = null;
     @SerializedName("backdrop_path")
     @Expose
     private String backdropPath;
@@ -58,7 +61,22 @@ public class Movie implements Parcelable {
     @Expose
     private String releaseDate;
 
+    public Movie(Integer voteCount, Boolean video, Double voteAverage, String title, Double popularity, String posterPath, String originalLanguage, String originalTitle, String backdropPath, Boolean adult, String overview, String releaseDate) {
+        this.voteCount = voteCount;
+        this.video = video;
+        this.voteAverage = voteAverage;
+        this.title = title;
+        this.popularity = popularity;
+        this.posterPath = posterPath;
+        this.originalLanguage = originalLanguage;
+        this.originalTitle = originalTitle;
+        this.backdropPath = backdropPath;
+        this.adult = adult;
+        this.overview = overview;
+        this.releaseDate = releaseDate;
+    }
 
+    @Ignore
     protected Movie(Parcel in) {
         if (in.readByte() == 0) {
             voteCount = null;
@@ -159,6 +177,10 @@ public class Movie implements Parcelable {
         return voteAverage;
     }
 
+    public Integer getVoteCount() {
+        return voteCount;
+    }
+
     public String getTitle() {
         return title;
     }
@@ -179,10 +201,6 @@ public class Movie implements Parcelable {
         return originalTitle;
     }
 
-    public List<Integer> getGenreIds() {
-        return genreIds;
-    }
-
     public String getBackdropPath() {
         return backdropPath;
     }
@@ -197,5 +215,57 @@ public class Movie implements Parcelable {
 
     public String getReleaseDate() {
         return releaseDate;
+    }
+
+    public void setId(Integer id) {
+        this.id = id;
+    }
+
+    public void setVoteCount(Integer voteCount) {
+        this.voteCount = voteCount;
+    }
+
+    public void setVideo(Boolean video) {
+        this.video = video;
+    }
+
+    public void setVoteAverage(Double voteAverage) {
+        this.voteAverage = voteAverage;
+    }
+
+    public void setTitle(String title) {
+        this.title = title;
+    }
+
+    public void setPopularity(Double popularity) {
+        this.popularity = popularity;
+    }
+
+    public void setPosterPath(String posterPath) {
+        this.posterPath = posterPath;
+    }
+
+    public void setOriginalLanguage(String originalLanguage) {
+        this.originalLanguage = originalLanguage;
+    }
+
+    public void setOriginalTitle(String originalTitle) {
+        this.originalTitle = originalTitle;
+    }
+
+    public void setBackdropPath(String backdropPath) {
+        this.backdropPath = backdropPath;
+    }
+
+    public void setAdult(Boolean adult) {
+        this.adult = adult;
+    }
+
+    public void setOverview(String overview) {
+        this.overview = overview;
+    }
+
+    public void setReleaseDate(String releaseDate) {
+        this.releaseDate = releaseDate;
     }
 }

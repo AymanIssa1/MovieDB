@@ -9,5 +9,7 @@ public class Constants {
     public static boolean INTERNET_CONNECTION_FLAG = true;
 
     public static final String MOVIE_PARCLE_EXTRA = "movie_parcel_extra";
+    public static final String SAVED_MOVIE_EXTRA = "saved_movie_extra";
+
 
 }

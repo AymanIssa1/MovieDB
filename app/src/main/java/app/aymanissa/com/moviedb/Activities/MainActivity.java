@@ -1,7 +1,10 @@
 package app.aymanissa.com.moviedb.Activities;
 
+import android.arch.lifecycle.Observer;
+import android.arch.lifecycle.ViewModelProviders;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.annotation.Nullable;
 import android.support.v4.view.MenuItemCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.GridLayoutManager;
@@ -13,6 +16,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.zplesac.connectionbuddy.ConnectionBuddy;
 import com.zplesac.connectionbuddy.interfaces.ConnectivityChangeListener;
@@ -29,14 +33,16 @@ import app.aymanissa.com.moviedb.Interfaces.MoviesInterface;
 import app.aymanissa.com.moviedb.Models.Movie;
 import app.aymanissa.com.moviedb.Models.Result;
 import app.aymanissa.com.moviedb.MoviesController;
+import app.aymanissa.com.moviedb.MoviesViewModel;
 import app.aymanissa.com.moviedb.R;
+import app.aymanissa.com.moviedb.SavedMoviesViewModel;
 import app.aymanissa.com.moviedb.SortType;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import iammert.com.library.Status;
 import iammert.com.library.StatusView;
 
-public class MainActivity extends AppCompatActivity implements MoviesAdapterListener, SearchView.OnQueryTextListener, ConnectivityChangeListener {
+public class MainActivity extends AppCompatActivity implements MoviesAdapterListener, SearchView.OnQueryTextListener, ConnectivityChangeListener, Observer<List<Movie>> {
 
     MoviesAdapter moviesAdapter;
 
@@ -51,6 +57,12 @@ public class MainActivity extends AppCompatActivity implements MoviesAdapterList
     MenuItem popularMenuItem;
     MenuItem topRatedMenuItem;
 
+    private boolean isFavoriteStateSelected = false;
+
+
+    private MoviesViewModel moviesViewModel;
+    private SavedMoviesViewModel savedMoviesViewModel;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -62,6 +74,10 @@ public class MainActivity extends AppCompatActivity implements MoviesAdapterList
         mainMoviesArrayList = new ArrayList<>();
 
         initRecyclerView();
+
+        savedMoviesViewModel = ViewModelProviders.of(this).get(SavedMoviesViewModel.class);
+        moviesViewModel = ViewModelProviders.of(this).get(MoviesViewModel.class);
+        moviesViewModel.getMoviesList().observe(this, this);
     }
 
 
@@ -76,13 +92,10 @@ public class MainActivity extends AppCompatActivity implements MoviesAdapterList
         searchView = (SearchView) MenuItemCompat.getActionView(item);
         searchView.setOnQueryTextListener(this);
 
-        searchView.setOnCloseListener(new SearchView.OnCloseListener() {
-            @Override
-            public boolean onClose() {
-                noMoviesFoundTextView.setVisibility(View.INVISIBLE);
-                setMoviesAdapter(mainMoviesArrayList);
-                return false;
-            }
+        searchView.setOnCloseListener(() -> {
+            noMoviesFoundTextView.setVisibility(View.INVISIBLE);
+            setMoviesAdapter(mainMoviesArrayList);
+            return false;
         });
 
         return true;
@@ -94,18 +107,40 @@ public class MainActivity extends AppCompatActivity implements MoviesAdapterList
         // automatically handle clicks on the Home/Up button, so long
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
-        switch (id){
+        switch (id) {
             case R.id.action_settings:
                 return true;
             case R.id.action_popular:
                 getMovies(SortType.POPULAR);
                 popularMenuItem.setVisible(false);
                 topRatedMenuItem.setVisible(true);
+                isFavoriteStateSelected = false;
+
+                if (savedMoviesViewModel.getMovies().hasActiveObservers())
+                    savedMoviesViewModel.getMovies().removeObservers(this);
+
+                if (!moviesViewModel.getMoviesList().hasActiveObservers())
+                    moviesViewModel.getMoviesList().observe(this, this);
+
                 return true;
             case R.id.action_top_rated:
                 getMovies(SortType.TOP_RATED);
                 popularMenuItem.setVisible(true);
                 topRatedMenuItem.setVisible(false);
+                isFavoriteStateSelected = false;
+
+                if (savedMoviesViewModel.getMovies().hasActiveObservers())
+                    savedMoviesViewModel.getMovies().removeObservers(this);
+
+                if (!moviesViewModel.getMoviesList().hasActiveObservers())
+                    moviesViewModel.getMoviesList().observe(this, this);
+
+                return true;
+            case R.id.action_favorite:
+                isFavoriteStateSelected = true;
+                popularMenuItem.setVisible(true);
+                topRatedMenuItem.setVisible(true);
+                getSavedMovies();
                 return true;
         }
 
@@ -125,8 +160,8 @@ public class MainActivity extends AppCompatActivity implements MoviesAdapterList
         MoviesController.getMovies(this, sortType, new MoviesInterface() {
             @Override
             public void onReceivedMovies(Result result) {
-                mainMoviesArrayList = result.movieList;
-                setMoviesAdapter(mainMoviesArrayList);
+                mainMoviesArrayList = result.getMovieList();
+                moviesViewModel.setMovies(mainMoviesArrayList);
             }
 
             @Override
@@ -140,7 +175,7 @@ public class MainActivity extends AppCompatActivity implements MoviesAdapterList
         MoviesController.getSearchedMovies(this, query, new MoviesInterface() {
             @Override
             public void onReceivedMovies(Result result) {
-                List<Movie> movieArrayList = result.movieList;
+                List<Movie> movieArrayList = result.getMovieList();
                 setMoviesAdapter(movieArrayList);
 
                 if (movieArrayList.size() == 0)
@@ -154,6 +189,14 @@ public class MainActivity extends AppCompatActivity implements MoviesAdapterList
         });
     }
 
+    void getSavedMovies() {
+        if (moviesViewModel.getMoviesList().hasActiveObservers())
+            moviesViewModel.getMoviesList().removeObservers(this);
+
+        if (!savedMoviesViewModel.getMovies().hasActiveObservers())
+            savedMoviesViewModel.getMovies().observe(this, this);
+    }
+
     void setMoviesAdapter(List<Movie> moviesArrayList) {
         moviesAdapter = new MoviesAdapter(moviesArrayList, getApplicationContext(), this);
         if (moviesArrayList != null)
@@ -165,6 +208,7 @@ public class MainActivity extends AppCompatActivity implements MoviesAdapterList
     public void onMovieClickListener(Movie movie) {
         Intent intent = new Intent(this, DetailsActivity.class);
         intent.putExtra(Constants.MOVIE_PARCLE_EXTRA, movie);
+        intent.putExtra(Constants.SAVED_MOVIE_EXTRA, isFavoriteStateSelected);
         startActivity(intent);
     }
 
@@ -198,7 +242,7 @@ public class MainActivity extends AppCompatActivity implements MoviesAdapterList
         if (event.getState().getValue() == ConnectivityState.CONNECTED) {
             // device has active internet connection
 
-            if (mainMoviesArrayList.isEmpty())
+            if (mainMoviesArrayList.size() == 0)
                 getMovies(SortType.POPULAR);
 
             statusView.setStatus(Status.COMPLETE);
@@ -210,5 +254,12 @@ public class MainActivity extends AppCompatActivity implements MoviesAdapterList
             statusView.setStatus(Status.ERROR);
             Constants.INTERNET_CONNECTION_FLAG = false;
         }
+    }
+
+    @Override
+    public void onChanged(@Nullable List<Movie> movies) {
+        Toast.makeText(this, "onChanged", Toast.LENGTH_SHORT).show();
+        mainMoviesArrayList = movies;
+        runOnUiThread(() -> setMoviesAdapter(movies));
     }
 }

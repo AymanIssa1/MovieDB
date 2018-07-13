@@ -3,6 +3,8 @@ package app.aymanissa.com.moviedb;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
+import app.aymanissa.com.moviedb.Models.MovieReviewsResult;
+import app.aymanissa.com.moviedb.Models.MovieTrailerResult;
 import app.aymanissa.com.moviedb.Models.Result;
 import io.reactivex.Observable;
 import okhttp3.OkHttpClient;
@@ -48,5 +50,15 @@ public class ApiClient implements ApiService{
     @Override
     public Observable<Result> getSearchedMovies(String query, String apiKey) {
         return apiService.getSearchedMovies(query, apiKey);
+    }
+
+    @Override
+    public Observable<MovieTrailerResult> getMovieTrailers(int movieId, String apiKey) {
+        return apiService.getMovieTrailers(movieId,apiKey);
+    }
+
+    @Override
+    public Observable<MovieReviewsResult> getMovieReviews(int movieId, String apiKey) {
+        return apiService.getMovieReviews(movieId,apiKey);
     }
 }
