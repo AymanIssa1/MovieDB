@@ -70,7 +70,10 @@ public class DetailsActivity extends AppCompatActivity {
         });
 
         movieDescriptionTextView.setText(movie.getOverview());
-        Picasso.with(this).load("http://image.tmdb.org/t/p/w185/" + movie.getPosterPath()).into(moviePosterImageView);
+        Picasso.with(this)
+                .load("http://image.tmdb.org/t/p/w185/" + movie.getPosterPath())
+                .placeholder(R.drawable.movie_placeholder)
+                .into(moviePosterImageView);
 
         rateTextView.setText(movie.getVoteAverage() + "/10");
         releaseDateTextView.setText(movie.getReleaseDate());

@@ -4,6 +4,7 @@ import android.arch.lifecycle.Observer;
 import android.arch.lifecycle.ViewModelProviders;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Parcelable;
 import android.support.annotation.Nullable;
 import android.support.v4.view.MenuItemCompat;
 import android.support.v7.app.AppCompatActivity;
@@ -44,10 +45,13 @@ import iammert.com.library.StatusView;
 
 public class MainActivity extends AppCompatActivity implements MoviesAdapterListener, SearchView.OnQueryTextListener, ConnectivityChangeListener, Observer<List<Movie>> {
 
+    private static SortType sortType = SortType.TOP_RATED;
+
     MoviesAdapter moviesAdapter;
 
     List<Movie> mainMoviesArrayList;
 
+    GridLayoutManager gridLayoutManager;
     @BindView(R.id.recyclerView) RecyclerView recyclerView;
     @BindView(R.id.noMoviesFoundTextView) TextView noMoviesFoundTextView;
 
@@ -59,6 +63,7 @@ public class MainActivity extends AppCompatActivity implements MoviesAdapterList
 
     private boolean isFavoriteStateSelected = false;
 
+    private Parcelable mListState;
 
     private MoviesViewModel moviesViewModel;
     private SavedMoviesViewModel savedMoviesViewModel;
@@ -77,7 +82,14 @@ public class MainActivity extends AppCompatActivity implements MoviesAdapterList
 
         savedMoviesViewModel = ViewModelProviders.of(this).get(SavedMoviesViewModel.class);
         moviesViewModel = ViewModelProviders.of(this).get(MoviesViewModel.class);
-        moviesViewModel.getMoviesList().observe(this, this);
+
+        if (sortType == SortType.TOP_RATED || sortType == SortType.POPULAR) {
+            moviesViewModel.getMoviesList().observe(this, this);
+            savedMoviesViewModel.getMovies().removeObserver(this);
+        } else if (sortType == SortType.FAVORITE) {
+            savedMoviesViewModel.getMovies().observe(this, this);
+            moviesViewModel.getMoviesList().removeObserver(this);
+        }
     }
 
 
@@ -116,6 +128,8 @@ public class MainActivity extends AppCompatActivity implements MoviesAdapterList
                 topRatedMenuItem.setVisible(true);
                 isFavoriteStateSelected = false;
 
+                sortType = SortType.TOP_RATED;
+
                 if (savedMoviesViewModel.getMovies().hasActiveObservers())
                     savedMoviesViewModel.getMovies().removeObservers(this);
 
@@ -129,6 +143,8 @@ public class MainActivity extends AppCompatActivity implements MoviesAdapterList
                 topRatedMenuItem.setVisible(false);
                 isFavoriteStateSelected = false;
 
+                sortType = SortType.POPULAR;
+
                 if (savedMoviesViewModel.getMovies().hasActiveObservers())
                     savedMoviesViewModel.getMovies().removeObservers(this);
 
@@ -140,6 +156,9 @@ public class MainActivity extends AppCompatActivity implements MoviesAdapterList
                 isFavoriteStateSelected = true;
                 popularMenuItem.setVisible(true);
                 topRatedMenuItem.setVisible(true);
+
+                sortType = SortType.FAVORITE;
+
                 getSavedMovies();
                 return true;
         }
@@ -148,10 +167,35 @@ public class MainActivity extends AppCompatActivity implements MoviesAdapterList
         return super.onOptionsItemSelected(item);
     }
 
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+
+        mListState = gridLayoutManager.onSaveInstanceState();
+        outState.putParcelable(Constants.LIST_STATE_EXTRA, mListState);
+    }
+
+    @Override
+    protected void onRestoreInstanceState(Bundle savedInstanceState) {
+        super.onRestoreInstanceState(savedInstanceState);
+
+        if(savedInstanceState != null)
+            mListState = savedInstanceState.getParcelable(Constants.LIST_STATE_EXTRA);
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+        if (mListState != null) {
+            gridLayoutManager.onRestoreInstanceState(mListState);
+        }
+    }
+
     void initRecyclerView() {
         recyclerView.setHasFixedSize(true);
 
-        GridLayoutManager gridLayoutManager = new GridLayoutManager(this, 2);
+        gridLayoutManager = new GridLayoutManager(this, 2);
         gridLayoutManager.setOrientation(LinearLayoutManager.VERTICAL);
         recyclerView.setLayoutManager(gridLayoutManager);
     }
@@ -261,5 +305,11 @@ public class MainActivity extends AppCompatActivity implements MoviesAdapterList
         Toast.makeText(this, "onChanged", Toast.LENGTH_SHORT).show();
         mainMoviesArrayList = movies;
         runOnUiThread(() -> setMoviesAdapter(movies));
+
+        if (moviesViewModel.getMoviesList().hasActiveObservers())
+            moviesViewModel.getMoviesList().removeObservers(this);
+
+        if (savedMoviesViewModel.getMovies().hasActiveObservers())
+            savedMoviesViewModel.getMovies().removeObservers(this);
     }
 }

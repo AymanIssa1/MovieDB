@@ -12,6 +12,7 @@ import app.aymanissa.com.moviedb.Models.MovieReviewsResult;
 import app.aymanissa.com.moviedb.Models.MovieTrailerResult;
 import app.aymanissa.com.moviedb.Models.Result;
 import io.reactivex.Observer;
+import io.reactivex.SingleObserver;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
@@ -32,7 +33,7 @@ public class MoviesController {
                 .getMovies(type, activity.getResources().getString(R.string.api_key))
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new Observer<Result>() {
+                .subscribe(new SingleObserver<Result>() {
                     Disposable disposable;
 
                     @Override
@@ -41,20 +42,18 @@ public class MoviesController {
                     }
 
                     @Override
-                    public void onNext(Result result) {
+                    public void onSuccess(Result result) {
                         moviesInterface.onReceivedMovies(result);
+                        disposable.dispose();
                     }
 
                     @Override
                     public void onError(Throwable e) {
                         moviesInterface.onError(e.getMessage());
-                    }
-
-                    @Override
-                    public void onComplete() {
                         disposable.dispose();
                     }
                 });
+
     }
 
     public static void getSearchedMovies(Activity activity, String searchQuery, final MoviesInterface moviesInterface){
@@ -62,7 +61,7 @@ public class MoviesController {
                 .getSearchedMovies(searchQuery,activity.getResources().getString(R.string.api_key))
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new Observer<Result>() {
+                .subscribe(new SingleObserver<Result>() {
                     Disposable disposable;
 
                     @Override
@@ -71,19 +70,17 @@ public class MoviesController {
                     }
 
                     @Override
-                    public void onNext(Result result) {
+                    public void onSuccess(Result result) {
                         moviesInterface.onReceivedMovies(result);
+                        disposable.dispose();
                     }
 
                     @Override
                     public void onError(Throwable e) {
                         moviesInterface.onError(e.getMessage());
-                    }
-
-                    @Override
-                    public void onComplete() {
                         disposable.dispose();
                     }
+
                 });
     }
 
@@ -93,7 +90,7 @@ public class MoviesController {
                 .getMovieTrailers(movieId, activity.getResources().getString(R.string.api_key))
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new Observer<MovieTrailerResult>() {
+                .subscribe(new SingleObserver<MovieTrailerResult>() {
                     Disposable disposable;
 
                     @Override
@@ -102,17 +99,14 @@ public class MoviesController {
                     }
 
                     @Override
-                    public void onNext(MovieTrailerResult movieTrailerResult) {
+                    public void onSuccess(MovieTrailerResult movieTrailerResult) {
                         moviesTrailersListener.onReceivedMovieTrailers(movieTrailerResult);
+                        disposable.dispose();
                     }
 
                     @Override
                     public void onError(Throwable e) {
                         moviesTrailersListener.onError(e.getMessage());
-                    }
-
-                    @Override
-                    public void onComplete() {
                         disposable.dispose();
                     }
                 });
@@ -123,7 +117,7 @@ public class MoviesController {
                 .getMovieReviews(movieId, activity.getResources().getString(R.string.api_key))
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new Observer<MovieReviewsResult>() {
+                .subscribe(new SingleObserver<MovieReviewsResult>() {
                     Disposable disposable;
 
                     @Override
@@ -132,19 +126,17 @@ public class MoviesController {
                     }
 
                     @Override
-                    public void onNext(MovieReviewsResult movieReviewsResult) {
+                    public void onSuccess(MovieReviewsResult movieReviewsResult) {
                         moviesReviewsListener.onReceivedMovieReviews(movieReviewsResult);
+                        disposable.dispose();
                     }
 
                     @Override
                     public void onError(Throwable e) {
                         moviesReviewsListener.onError(e.getMessage());
-                    }
-
-                    @Override
-                    public void onComplete() {
                         disposable.dispose();
                     }
+
                 });
     }
 

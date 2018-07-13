@@ -5,6 +5,7 @@ import app.aymanissa.com.moviedb.Models.MovieReviewsResult;
 import app.aymanissa.com.moviedb.Models.MovieTrailerResult;
 import app.aymanissa.com.moviedb.Models.Result;
 import io.reactivex.Observable;
+import io.reactivex.Single;
 import retrofit2.http.GET;
 import retrofit2.http.Path;
 import retrofit2.http.Query;
@@ -16,16 +17,16 @@ import retrofit2.http.Query;
 public interface ApiService {
 
     @GET("/3/movie/{path}")
-    Observable<Result> getMovies(@Path("path") String path, @Query("api_key") String apiKey);
+    Single<Result> getMovies(@Path("path") String path, @Query("api_key") String apiKey);
 
     @GET("/3/search/movie")
-    Observable<Result> getSearchedMovies(@Query("query") String query, @Query("api_key") String apiKey);
+    Single<Result> getSearchedMovies(@Query("query") String query, @Query("api_key") String apiKey);
 
     @GET("/3/movie/{id}/videos")
-    Observable<MovieTrailerResult> getMovieTrailers(@Path("id") int movieId, @Query("api_key") String apiKey);
+    Single<MovieTrailerResult> getMovieTrailers(@Path("id") int movieId, @Query("api_key") String apiKey);
 
 
     @GET("/3/movie/{id}/reviews")
-    Observable<MovieReviewsResult> getMovieReviews(@Path("id") int movieId, @Query("api_key") String apiKey);
+    Single<MovieReviewsResult> getMovieReviews(@Path("id") int movieId, @Query("api_key") String apiKey);
 
 }

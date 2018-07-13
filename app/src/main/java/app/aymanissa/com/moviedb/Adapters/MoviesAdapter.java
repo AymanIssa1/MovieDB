@@ -43,14 +43,12 @@ public class MoviesAdapter extends RecyclerView.Adapter<MoviesAdapter.MoviesView
     @Override
     public void onBindViewHolder(MoviesViewHolder holder, int position) {
         final Movie movie = moviesList.get(position);
-        Picasso.with(context).load("http://image.tmdb.org/t/p/w185/" + movie.getPosterPath()).into(holder.movieImageView);
+        Picasso.with(context)
+                .load("http://image.tmdb.org/t/p/w185/" + movie.getPosterPath())
+                .placeholder(R.drawable.movie_placeholder)
+                .into(holder.movieImageView);
 
-        holder.itemView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                listener.onMovieClickListener(movie);
-            }
-        });
+        holder.itemView.setOnClickListener(view -> listener.onMovieClickListener(movie));
     }
 
     @Override
